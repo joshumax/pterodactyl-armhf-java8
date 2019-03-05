@@ -13,6 +13,8 @@ RUN apt-get -y update
 RUN apt-get -y update
 RUN apt-get -y install software-properties-common
 
+RUN adduser -D -h /home/container container
+
 RUN \
   echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections && \
   add-apt-repository -y ppa:webupd8team/java && \
@@ -22,10 +24,15 @@ RUN \
   rm -rf /var/cache/oracle-jdk8-installer
 
 # Define working directory.
-WORKDIR /data
+USER container
+ENV  USER=container HOME=/home/container
+
+WORKDIR /home/container
 	
 # Define commonly used JAVA_HOME variable
 ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 
 # Define default command.
-CMD ["bash"]
+COPY ./entrypoint.sh /entrypoint.sh
+
+CMD ["/bin/bash", "/entrypoint.sh"]
